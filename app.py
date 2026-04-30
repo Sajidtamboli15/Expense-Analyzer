@@ -11,9 +11,26 @@ app = Flask(__name__)
 app.secret_key = "secretkey"   # ⚠️ change this in production
 
 # Configure DB
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:sajid1508@localhost/expense_tracker'
+import os
+
+db_url = os.environ.get("DATABASE_URL")
+
+if db_url:
+    # Render / TiDB Cloud connection
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        "connect_args": {
+            "ssl": {"require": True}   # TiDB Cloud requires SSL
+        }
+    }
+else:
+    # Local MySQL fallback
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:sajid1508@localhost/expense_tracker'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+
 
 # User Model
 class User(db.Model, UserMixin):
