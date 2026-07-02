@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
+        /* Global Theme Styles */
         body.light-mode {
             background-color: #F5F7FA;
             color: #212529;
@@ -24,7 +25,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.08);
         }
-        .card.dark-mode {
+        .card-dark {
             background-color: #1e1e1e;
             color: #f8f9fa;
         }
@@ -42,7 +43,7 @@
         /* Tables */
         .table { border-radius: 8px; overflow: hidden; }
         .table thead { background-color: #1A2A6C; color: #fff; }
-        .table.dark-mode { color: #f8f9fa; }
+        .table-dark { color: #f8f9fa; }
 
         /* Headers */
         h1 { font-weight: 600; color: #1A2A6C; }
@@ -50,8 +51,9 @@
 </head>
 <body class="light-mode">
 
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+<!-- Header / Navbar -->
+<header>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3" role="navigation" aria-label="Main navigation">
   <div class="container-fluid">
     <a class="navbar-brand fw-bold" href="/">Expense Analyzer</a>
     <div class="collapse navbar-collapse justify-content-end">
@@ -63,8 +65,9 @@
     </div>
   </div>
 </nav>
+</header>
 
-<div class="container py-5">
+<main class="container py-5">
     <!-- Flash messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -77,16 +80,19 @@
       {% endif %}
     {% endwith %}
 
+    <!-- Page Heading + Controls -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="text-center flex-grow-1">AI Expense Analyzer 💰</h1>
         <div>
             <a href="/csv" class="btn btn-outline-info me-2">Go to CSV Analyzer</a>
-            <button id="theme-toggle" class="btn btn-outline-secondary">Switch Theme</button>
+            <button id="theme-toggle" class="btn btn-outline-secondary" aria-label="Switch between light and dark mode">
+                Switch Theme
+            </button>
         </div>
     </div>
 
-    <!-- Manual Entry -->
-    <div class="card mb-4">
+    <!-- Manual Entry Section -->
+    <section class="card mb-4">
         <div class="card-header bg-primary text-white">Add Expense Manually</div>
         <div class="card-body">
             <form action="/add_expense" method="post" class="row g-3">
@@ -104,7 +110,7 @@
                 </div>
             </form>
         </div>
-    </div>
+    </section>
 
     <!-- Month Selector -->
     {% if months %}
@@ -121,9 +127,9 @@
     </form>
     {% endif %}
 
-    <!-- Expense Records -->
+    <!-- Expense Records Table -->
     {% if rows %}
-    <div class="card mb-4">
+    <section class="card mb-4">
         <div class="card-header bg-dark text-white">
             {{ selected_month }} - Expense Records
         </div>
@@ -131,35 +137,38 @@
            <table class="table table-striped table-bordered">
     <thead>
         <tr>
-            <th>Sr. No.</th>
-            <th>Description</th>
-            <th>Category</th>
-            <th>Amount</th>
-            <th>Date</th>
-            <th>Action</th>
+            <th scope="col">Sr. No.</th>
+            <th scope="col">Description</th>
+            <th scope="col">Category</th>
+            <th scope="col">Amount</th>
+            <th scope="col">Date</th>
+            <th scope="col">Action</th>
         </tr>
     </thead>
     <tbody>
         {% for row in rows %}
         <tr>
-            <td>{{ loop.index }}</td>   <!-- Serial number -->
+            <td>{{ loop.index }}</td>
             <td>{{ row.item }}</td>
             <td>{{ row.category }}</td>
             <td>{{ row.amount }}</td>
             <td>{{ row.date }}</td>
-            <td><a href="/delete/{{ row.id }}" class="btn btn-sm btn-danger">Delete</a></td>
+            <td>
+                <a href="/delete/{{ row.id }}" class="btn btn-sm btn-danger" aria-label="Delete expense {{ row.item }}">
+                    Delete
+                </a>
+            </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
-
         </div>
-    </div>
+    </section>
     {% endif %}
 
-    <!-- Summary -->
+    <!-- Summary Section -->
     {% if summary %}
-    <div class="card mb-4">
+    <section class="card mb-4">
         <div class="card-header bg-success text-white">
             {{ selected_month }} - Spending Summary
         </div>
@@ -167,8 +176,8 @@
             <table class="table table-bordered">
                 <thead class="table-light">
                     <tr>
-                        <th>Category</th>
-                        <th>Total (₹)</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Total (₹)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -185,12 +194,12 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </section>
     {% endif %}
 
-    <!-- Charts -->
+    <!-- Charts Section -->
     {% if pie_chart or bar_chart %}
-    <div class="card mb-4">
+    <section class="card mb-4">
         <div class="card-header bg-info text-white">
             {{ selected_month }} - Visual Insights
         </div>
@@ -204,17 +213,24 @@
             {{ bar_chart|safe }}
             {% endif %}
         </div>
-    </div>
+    </section>
     {% endif %}
-</div>
+</main>
 
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    // Theme toggle script with accessibility-friendly class handling
     document.getElementById("theme-toggle").addEventListener("click", function() {
+        // Toggle body theme
         document.body.classList.toggle("dark-mode");
         document.body.classList.toggle("light-mode");
-        document.querySelectorAll(".card").forEach(card => card.classList.toggle("dark-mode"));
-        document.querySelectorAll(".table").forEach(table => table.classList.toggle("dark-mode"));
+
+        // Toggle card theme
+        document.querySelectorAll(".card").forEach(card => card.classList.toggle("card-dark"));
+
+        // Toggle table theme
+        document.querySelectorAll(".table").forEach(table => table.classList.toggle("table-dark"));
     });
 </script>
 </body>
